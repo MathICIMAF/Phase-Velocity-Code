@@ -1,0 +1,474 @@
+/*	
+	PhaseVelocity Code
+
+	Solution of the wave propagation problem in a steel curved plate waveguides from a pulse emitted at the left end boundary of the plate.
+	The displacement u = (ux, uy) of each point on the plate in time is calculated.
+	u depends on the temporal variable t and the spatial variables (x, y).
+	The problem is solved using FEM for the spatial variables (x, y) and the Houbolt method (2nd order finite differences)
+	to approximate the second derivative of the displacement vector  u with respect to time.
+	///////////////////////////////////////////////////////////////////////////////////////////
+	To execute the code, the functions.edp file and the PhaseVelocity.edp file must be in the same folder. 
+	Run the main file PhaseVelocity.edp
+	
+	Input:
+	f0 - frequency in the interval [1 , 15]x10^5 Hz.
+	Kappa- curvature of the plate in the interval [0.01 , 90] m^-1
+
+	Output
+	The code displays on console the phase velocity value associated to the selected frequency and curvature.
+	It also shows how the wave propagates through the curved plate and the line fitting the arrival of the first relative maximum at the 6 checkpoints.
+*///////////////////////////////////////////////////////////////////////////////
+
+cout<<"WavePropagation Code"<<endl;
+cout<<endl;
+cout<<"Solution of the wave propagation problem in a steel curved plate waveguides from a pulse emitted at the left end boundary of the plate."<<endl;
+cout<<"The displacement u = (ux, uy) of each point on the plate in time is calculated."<<endl;
+cout<<"u depends on the temporal variable t and the spatial variables (x, y)."<<endl;
+cout<<"The problem is solved using FEM for the spatial variables (x, y) and the Houbolt method (2nd order finite differences) to approximate the second derivative of the displacement vector u with respect to time."<<endl;
+cout<<endl;
+cout<<"Input:"<<endl;
+cout<<"f0 - frequency (Hz). Select a frequency value in the interval [1 , 15]x10^5 Hz."<<endl;
+cout<<"Kappa - curvature (m^-1). Select a curavture value in the interval [0.01 , 90] m^-1."<<endl;
+cout<<endl;
+cout<<"Output"<<endl;
+cout<<"The code displays on console the phase velocity value associated to the selected frequency and curvature."<<endl;
+cout<<"It also shows how the wave propagate through the curved plate and the line fitting the arrival of the first relative maximum at the 6 checkpoints."<<endl;
+
+cout<<endl;
+cout<<"Example:"<<endl;
+cout<<"To enter the frequency 3x10^5 Hz, write 3e5 in the line where appears 'f0='."<<endl;
+cout<<endl;
+
+
+include "functions.edp"
+real Kappa;
+real px, py, phi;
+int ii;
+real cpu;
+real  t=0,       								      		// Initial time
+rho=7850, P=0.30, E=200e9;                				  	// Young's modulus
+
+real mu=(E/(2*(1+P))), lambda=(E*P/((1+P)*(1-2*P)));   		// Lamé's constants
+cout<< "Lame's constants for steel material:"<<endl;
+cout<<"Mu= " <<mu<<" N/m^2, Lambda= "<<lambda<<" N/m^2"<<endl;
+cout<<"Density of the material, Rho= "<<rho<<" Kg/m"<<endl;
+
+real nyd, dt, Tend, f00, f0;
+
+// Plate dimensions (m).
+real Ly, Lx, h;
+Ly=1e-3;  Lx=50*Ly; 
+cout<<"Plate thickness= "<<Ly<<" m"<<endl;
+cout<<endl;
+
+//########## 	Input Values	##################################
+
+while(f0<1e5 || f0>15e5){
+
+	cout<<"Choose a frequency f0 in the interval [1e5 , 15e5] Hz"<<endl;
+	cout<<"f0= ";
+	cin>>f0;
+
+}
+
+while(Kappa<0.01 || Kappa>90){
+
+	cout<<"Choose a curvature kappa in the interval [0.01 , 90] m^-1"<<endl;
+	cout<<"kappa= ";
+	cin>>Kappa;
+
+}
+ 
+// #################################################################		
+
+
+cpu=clock();
+
+real aumento;
+if(f0>=1e5&&f0<1.5e5){
+	Tend=3.5e-5;
+	aumento=1.3;
+}
+if(f0>=1.5e5&&f0<2e5){
+	Tend=3.0e-5;
+	aumento=1.3;
+}
+if(f0>=2e5&&f0<3e5){
+	Tend=2.3e-5;
+	aumento=1.3;
+}
+if(f0>=3e5&&f0<6e5){
+	Tend=1.8e-5;	
+	aumento=0.4;
+}
+if(f0>=6e5&&f0<9e5){
+	Tend=1.3e-5;	
+	aumento=0.4;
+}
+if(f0>=9e5&&f0<=15e5){
+	Tend=1.2e-5;
+	aumento=0.2;
+}
+ 
+// dt- delta_t (seg) step for temporal discretization.
+dt = 1e-8;
+real g;
+//////////////////////////////////////////////////////////////////////////////////////
+
+real  nxa, nyb, nxc; 
+real rm, thetaf=pi/2, thetai, r1, r2;
+mesh Sh;
+
+rm=1/Kappa; thetai=thetaf-Lx/rm; r1=rm-(Ly/2); r2=rm+(Ly/2); 
+phi = Ly/(r2);
+
+// Boundary partition
+
+if(f0>6e5){
+	nyd=15;
+}else{
+	nyd=6;
+}
+
+nxa=(nyd*r1*(thetaf-thetai))/Ly;
+nyb=nyd;
+nxc=(nyd*r2*(thetaf-thetai))/Ly; 
+
+// Definition of the boundaries
+
+border delta1(theta=thetai,thetaf){x=r1*cos(-theta+thetai+thetaf);y=r1*sin(-theta+thetai+thetaf);label=1;};		// Bottom boundary
+border delta2(r=r1,r2){x=r*cos(thetai);y=r*sin(thetai);label=2;};												// Left boundary
+border delta3(theta=thetai,thetaf){x=r2*cos(theta);y=r2*sin(theta);label=3;};									// Top boundary
+border delta4(r=r1,r2){x=(-r+r1+r2)*cos(thetaf);y=(-r+r1+r2)*sin(thetaf);label=4;};								// Right boundary
+
+// plot(delta1(nxa)+delta2(nyd)+delta3(nxc)+delta4(nyb), wait=1 );	// Uncomment, if you want see the border
+Sh=buildmesh(delta1(nxa)+delta2(nyd)+delta3(nxc)+delta4(nyb));		// Generate the mesh
+// plot(Sh, wait=1, ps="malla Sh.eps" ); 							// Uncomment, if you want see the mesh
+///////////////////////////////////////////////////////////////////////////////////////
+
+macro u [u1,u2]       							// Solution u
+macro up [up1,up2]     							// Last step u_(i-1)
+macro upp [upp1,upp2]   						// Last step u_(i-2)
+macro uppp [uppp1,uppp2]   						// Last step u_(i-3)
+macro v [v1,v2]     							// Test function v
+macro sigma [(lambda*(dx(u1)+dy(u2))+2*mu*dx(u1)),(mu*(dy(u1)+dx(u2))),(lambda*(dx(u1)+dy(u2))+2*mu*dy(u2))] 	// stress matrix
+
+
+
+//// Define the problem  ////////////////////////////////////////////////////////////
+fespace Vh(Sh,[P2,P2]);
+Vh [h1,h2] = [hTriangle,hTriangle] ;			// element size
+int ng = Vh.ndof;								// Degree of freedom	
+cout << "Degrees of freedom = "<< ng <<endl;  	// display in console the Degrees of freedom		
+cout << "mesh size = "<< h1[].max <<endl;		// display in console the mesh size
+
+Vh u, v, upp=[0,0],up=[0,0],uppp=[0,0];
+
+//Variational Formulation a(u,v)-F(v)=0
+//This formulation uses central difference formula to approximate the second derivative of the displacement with respect to time.
+varf a1(u,v)= int2d(Sh)( rho*(u')*v +(dt^2)*(sigma[0]*dx(v[0])+ sigma[1]*(dy(v[0])+dx(v[1]))+ sigma[2]*dy(v[1])) )
++on(4,u1=0,u2=g);//
+
+varf b11 (up,v) = int2d(Sh)(rho*(2*(up')*v));  	// u_(i-1)
+varf b21 (upp,v) = int2d(Sh)(-1*rho*(upp')*v);  // u_(i-2)
+
+matrix A1=a1(Vh,Vh,solver=Cholesky,factorize=1,tgv=1);
+
+matrix B11 = b11(Vh,Vh,tgv=1);
+matrix B21 = b21(Vh,Vh,tgv=1);
+
+//This formulation uses Houbolt difference scheme to approximate the second derivative of the displacement with respect to time.
+varf a(u,v)= int2d(Sh)( 2*rho*(u')*v +(dt^2)*(sigma[0]*dx(v[0])+ sigma[1]*(dy(v[0])+dx(v[1]))+ sigma[2]*dy(v[1])) )
++on(4,u1=0,u2=g);//
+
+varf b1 (up,v) = int2d(Sh)(rho*(5*(up')*v));  	// u_(i-1)
+varf b2 (upp,v) = int2d(Sh)(-4*rho*(upp')*v);  	// u_(i-2)
+varf b3(uppp,v)= int2d(Sh)(rho*(uppp')*v ); 	//u_(i-3)
+varf bcl(u,v)=on(4,u1=0,u2=g); 
+
+matrix B1 = b1(Vh,Vh,tgv=1);
+matrix B2 = b2(Vh,Vh,tgv=1);
+matrix B3 = b3(Vh,Vh,tgv=1);
+
+real[int] sol(Vh.ndof),solp(Vh.ndof),solpp(Vh.ndof),solppp(Vh.ndof);
+solppp=0; solp=0; solpp=0; 
+
+matrix A=a(Vh,Vh,solver=Cholesky,factorize=1,tgv=1);//,tolpivot=1e-3, tolpivotsym=tps
+
+////////////////////////////////////////////////////////////////////////////
+
+
+int i=0, j=0;
+int  dim=(Tend/dt);
+real diesmar=dim*1.e-2, diesmar1=diesmar; int k=0; 
+int div, dim1;
+if(dt==1e-7){		
+		div=10;			
+}else{		
+		div=100;		
+}
+dim1=dim/div;
+int n = 6; //number of checkpoints
+real[int] tt(dim);
+real[int,int] uu1(Vh.ndof,dim1), uu2(Vh.ndof,dim1), sqt(Vh.ndof,dim1), uyp(dim,n),uypplot(dim,n);
+
+//////////////////////////////////////// 
+ 
+ cout<<"Compute: "<<endl;
+ 
+// Cycle in time with size dt
+for( i=0;i<dim;i++){
+
+	if((t/dt)>=diesmar1){
+		cout<<"\r";
+		cout<<"\t"<<k++<<"%";
+		diesmar1+=diesmar;		
+	}
+
+	tt[i] = t;  // Save the time value to compute the phase velocity
+
+	// Function that describes the pulse	
+	g = Ly * sin(0.2e1 * pi * f0 * t) * exp(-0.9134221857e0 * (f0 ^ 2) * (t - ((0.9e1 / 0.4e1) / f0)) ^ 2);
+
+	if(i<1){
+		//Solve the System of Linear Equations corresponding to FEM approximation for time t=t1 to obtain u(t1)=[u1(t1),u2(t1)].
+		real[int] BC = bcl(0,Vh,tgv=1) ,b(Vh.ndof);
+		solpp=solp; solp=sol;							// Update the initial values
+		b=B11*solp; b+= B21*solpp; b+=BC;
+
+		sol=A1^-1*b; 									//Solve the System of Linear Equations
+
+		u1[]=sol; u1[]=u1[]; u2[]= u2[];
+		
+	}else{
+		//Solve the System of Linear Equations corresponding to FEM approximation for time t=ti to obtain u(ti)=[u1(ti),u2(ti)].
+		real[int] BC = bcl(0,Vh,tgv=1) ,b(Vh.ndof);
+		solppp= solpp; solpp=solp; solp=sol;			// Update the initial values
+		b=B1*solp; b+= B2*solpp; b+=B3*solppp; b+=BC;
+
+		sol=A^-1*b;										// Solve the System of Linear Equations
+
+		u1[]=sol; u1[]=u1[]; u2[]= u2[];
+
+	}
+
+
+
+	//// Save the values of the displacement in the checkpoints to compute the phase velocity. ////
+	for(int ii=1; ii<=n; ii++){
+		px=(r2)*sin((ii+4)*phi);
+		py=(r2)*cos((ii+4)*phi);
+		
+		uyp(i,ii-1) = u2(px,py);  // To compute the phase velocity
+		uypplot(i,ii-1) = u2(px,py)+ (0.0025*(n-ii));  // To graph the 6 displacement curves
+	
+	}
+	////////////////////////////////////////////////////
+
+
+	
+	if(i%div==0 && j<dim1){
+		/// Values of the displacements to be graphed
+		uu1(:,j)=u1[]; uu2(:,j)=u2[]; sqt(:,j)=sqrt(u1^2+u2^2);		
+		j++;
+	}
+
+	t+=dt;  // Increased time by one dt step
+}
+
+while(k<=100){
+	cout<<"\r";
+	cout<<"\t"<<k++<<"%";
+}
+cout<<endl;
+
+real cputime = clock()-cpu;
+cout << " CPU time = " << cputime <<" sec"<< endl;
+
+	
+{////// Graphic part of the code  //////////////////////////////
+	real[int] colorhsv=[ // color hsv model
+		0.3, 1, 1, // green
+		0.4, 1, 1, // light green
+		0.5, 1, 1, // light blue
+		0.6, 1, 1, // blue
+		0.7, 1, 1, // magenta
+		0.8,1 , 1, //light magenta
+		0.9, 1, 1, // light red
+		1, 1, 1    // red
+	];
+
+	real minimo, maximo, inc;
+	minimo=sqt.min; maximo=sqt.max;
+	maximo=1e-3;
+	real[int] viso(31);
+	inc=(maximo-minimo)/30;
+	viso[0]=minimo;
+	for (int i=1;i<viso.n;i++){
+		viso[i]=viso[i-1]+inc;
+	}
+
+
+	for(j=1; j<dim1; j++){
+		u1[]=uu1(:,j); u2[]=uu2(:,j);
+		mesh Th=movemesh(Sh,[x+aumento*u1,y+aumento*u2]);  				
+
+	////////////////////////////////////////////////////////////////////////////////////
+		fespace Wh(Th,P2);
+		Wh D;
+		D=sqrt(u1^2+u2^2);
+
+	//////////////////////////////////////////////////////////////////////////////////////
+		if(j==dim1-1){
+
+			plot(D,viso=viso(0:viso.n-1),value=1,fill=1,wait=1,hsv=colorhsv,cmm="Propagation of a pulsed wave along a steel plate, colors represent the magnitude of the norm of the displacement. Type Enter key to continue.", dim=2,ShowAxes=0 );
+		} else{
+			plot(D,viso=viso(0:viso.n-1),value=1,fill=1,wait=0,hsv=colorhsv,cmm="Propagation of a pulsed wave along a steel plate, colors represent the magnitude of the norm of the displacement.", dim=2,ShowAxes=0 );
+		}
+	}
+}
+/////////////////////////////////////////////////////////////////
+ 
+ 
+{////// Compute Phase Velocity /////////////////////////////////
+	
+	int[int,int] minmax(100,2);
+	real tmaxnext, aymax, rangouy;
+	int[int] tmax(n);
+	int pcurv=2, pline=1, jj;
+	real[int] t1(n), t2(n), tx(n), ay(n), acurv(pcurv+1), aline(pline+1);
+
+	j=1;
+	for (int i=0; i<n; i++){
+		minmax =maxcurv(uyp(:,i)); // calculate all the min and max points that the curve uy(t,p_i) has
+		if (j>2){
+			j=j-2;
+		}
+		
+		int lengmax = minmax(0,1), lengmin = minmax(0,0);	// vector size min and max
+		
+		tmax[i]=minmax(j,1);
+		if (i==0){
+			
+			if(f0>15e5){
+				rangouy=8e-4;	// Reference value to select the 1st maximum
+			}else{
+				rangouy=1e-4;	// Reference value to select the 1st maximum
+			}
+			while (uyp(tmax[i],i)<rangouy ){ // Select the 1st maximum > rangouy
+				tmax[i]=minmax(j,1); 
+				j++;
+			}
+			tmaxnext = minmax(j,1);
+		}		
+	
+		if(i==1){
+			while (tt[tmax[i]]<tt[tmax[i-1]] && tt[tmax[i]]<tt[tmaxnext]){ // Select the 2nd maximum
+				tmax[i]=minmax(j,1); 
+				j++;
+			}
+			tmaxnext = minmax(j,1);
+		}
+	
+		if(i>1){
+			
+			while ((tmax[i]<tmax[i-1] || uyp(tmax(i),i)< uyp(tmax(i-1),i-1))&& j<lengmax ){// Select the rest of the maximums
+				tmax[i]=minmax(j,1); 		
+				
+				if ( uyp(tmax(i),i)> uyp(tmax(0),0)){ // Compare with the 1st maximum
+					if (uyp(minmax(j,1),i)> uyp(minmax(j-1,1),i) && uyp(minmax(j,1),i)> uyp(minmax(j+1,1),i)){ // If it's the absolute maximum I'll take that one
+						tmax[i]=minmax(j,1);
+						break;
+					}
+				}
+				j++;
+			}
+			if(j<lengmax){
+				tmaxnext = minmax(j+1,1);
+			}else{
+				tmaxnext = tmax[i];
+			}
+		}
+		
+		real[int] tcurv(20), uycurv(20);
+		k=0;
+		for (int ii=tmax[i]-10; ii<tmax[i]+10; ii++){
+			tcurv[k]=tt[ii];
+			uycurv[k]=uyp(ii,i);
+			k++;
+		}
+	
+		acurv = ajustepol(tcurv,uycurv,pcurv);  // Calculate the polynomial of degree 2 that fits the curve in the interval [tmax[i]-10 ; tmax[i]+10]
+		
+		tx[i]=maxajustepol(acurv,tt[tmax[i]-10],tt[tmax[i]+10]);	// Calculate the time tx where it reaches the maximum
+			
+		ay[i]=evalpol(acurv,tx[i]);  	// Evaluate at tx time
+		ay[i]= ay[i]+(0.0025*(n-1-i)); 	// trick so that the n curves are plotted one on top of the other
+	}   
+    
+	 
+	// Curve Graphs
+	plot([tt,uypplot(:,0)],[tt,uypplot(:,1)],[tt,uypplot(:,2)],[tt,uypplot(:,3)],[tt,uypplot(:,4)],[tt,uypplot(:,5)],[tx,ay],ShowAxes=true,cmm="Displacement in the vertical direction uy(t, Pi), i=[1;6] and fit line. Type Esc key to exit.",wait=true,aspectratio=0);
+
+
+	{//////// Show Phase Velocity  ///////////////////
+		real VelFase;
+		real[int] xx(n);
+		
+		for(int jj=1; jj<=n; jj++){
+			
+			xx(jj-1)=(jj+4)*(2*r2*atan((sin(phi))/2)); //arc length between checkpoints
+		}
+		
+		aline=ajustepol(tx,xx,pline);	// Fitting line
+		VelFase=aline[1];				// Phase Velocity (Slope of the line)
+		cout<<endl;
+		cout<<"-----------------------------------------------------------"<<endl;
+		string spacios;
+		string salida;
+		cout<<"|%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%|"<<endl;
+		salida = "|%%           Frequency f0 = "+f0/1e5+"e5 Hz%%|";
+		spacios= " ";
+		for(int ii=0; ii<59-salida.length-1; ii++){
+			spacios = " "+spacios;
+		}
+		salida = salida(0:salida.length-4)+spacios+salida(salida.length-3:salida.length);
+		cout<<salida<<endl;
+		
+		salida = "|%%           Curvature Kappa = "+Kappa+" m^-1%%|";
+		spacios= " ";
+		for(int ii=0; ii<59-salida.length-1; ii++){
+			spacios = " "+spacios;
+		}
+		salida = salida(0:salida.length-4)+spacios+salida(salida.length-3:salida.length);
+		cout<<salida<<endl;		
+		cout<<"|%%                                                     %%|"<<endl;
+		
+		salida = "|%%           Phase Velocity = "+VelFase+" m/s%%|";
+		spacios= " ";
+		for(int ii=0; ii<59-salida.length-1; ii++){
+			spacios = " "+spacios;
+		}
+		salida = salida(0:salida.length-4)+spacios+salida(salida.length-3:salida.length);
+		cout<<salida<<endl;	
+		cout<<"|%%                                                     %%|"<<endl;
+		cout<<"|%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%|"<<endl;
+		cout<<"-----------------------------------------------------------"<<endl;
+
+	}	
+ 
+}
+
+cout << " Total time = " << clock()-cpu << " sec"<< endl;
+////////////////////////////////////////////////////////////////
+ 
+cout<<endl;
+
+string exit="";
+while (exit!="s"){
+	cout<<"Write s to exit = ";
+	cin>>exit;
+	if (exit == "S"){
+		exit = "s";
+	}
+}

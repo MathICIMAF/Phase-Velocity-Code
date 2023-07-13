@@ -1,0 +1,187 @@
+
+
+//Function
+ 
+func int[int,int] maxcurv (real[int] &yy){
+ 	/*
+		max_curv(yy) computes the positions where the vector yy has relative minimum and maximum.
+		Input: 
+		yy - vector of real values (lenght = n).
+
+		Output
+		minmax - matrix of two columns.
+				 The first column shows the relative minimum values and the second column shows the relative maximum values.
+		 
+	 */
+        
+	int k1=1,k2=1, n=100;
+	real m1, m2;
+	int[int,int] minmax(n,2);
+	
+	for (int i=1; i<yy.n; i++){
+		m1=(yy(i)-yy(i-1)); 		// slope between 2 consecutive points
+		
+		if (i>1){
+			if(m2<0 && m1>0 && k1<n){  // if it is negative it is a minimum
+				minmax(k1,0)=i;
+				k1++;
+			}
+			if(m2>0 && m1<0 && k2<n){	// if it is positive it is a maximum				
+				minmax(k2,1)=i;
+				k2++;					
+			}
+		}
+		m2=m1;
+	}
+	minmax(0,0)=k1-1; minmax(0,1)=k2-1;  // vector size min and max
+	
+	return minmax; //return of variable
+	
+}
+
+//////////////////////////////////////////////////////////////////////
+
+func real[int] ajustepol(real[int] &xx, real[int] &yy, int p){
+
+	/* 
+		ajustepol(xx,yy,p) compute the coefficients of the polynomial of degree p 
+		that best approximates the (xx,yy) points. 
+
+		Input:
+		xx - vector of real values (length = n).
+		yy - vector of real values (length = n).
+		p - integer value.
+
+		Output:
+		a=[a_0, a_1, ..., a_p] - vector of real values (length = p+1). Coefficients of the fit curve.	
+	*/
+
+    real[int] Sx(2*p), Sxy(p+1), a(p+1);
+	real n=yy.n;
+
+	for(int k=0; k<(2*p); k++){
+		for(int r=0; r<n; r++){
+			Sx[k]+=(xx[r])^(k+1);
+			if(k<=p){
+				Sxy[k]+=((xx[r])^k)*yy[r];
+			}	
+		
+		}	
+	}
+
+	real[int,int] M(p+1,p+1), b1(p+1,p+1);
+
+	for (int i=0; i<=p; i++){
+		for (int j=0;j<=p; j++){
+			if (i+j<=0){
+				M(0,0)=n;			
+			}else{
+				M(i,j)=Sx[i+j-1];
+			}
+		}    
+	}
+	
+	matrix A=M;
+	set(A,solver=UMFPACK);
+
+	a=A^-1*Sxy;
+	
+    return a; //Returns the coefficients a of the fitting polynomial
+}
+
+///////////////////////////////////////////////////////////////////////
+
+func real[int] evalpolvect(real[int] &a, real[int] &xx){
+	/*
+		evalpolvect(a, xx) - Returns the 'ay' values corresponding to the evaluation of the 'a' polynomial at the 'xx' points.
+
+		Input:
+		a - vector of real values (length = p). The coefficients of the polynomial to evaluate.
+		xx - vector of real values (length = n). Values where you want to evaluate the polynomial.
+
+		Output:
+		ay - vector of real values (length = n). Evaluation of the polynomial at 'xx' points.
+	*/ 
+
+	int n=xx.n; 		// length of the vector of points to evaluate
+	int p=a.n-1; 		// degree of polynomial
+	real[int] ay(n);
+
+	for(int i=0;i<n;i++){
+		for (int j=0;j<p+1;j++){
+			ay[i]+=a[j]*((xx[i])^j);
+		}	
+	}
+
+		return ay;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+func real evalpol(real[int] &a, real &xx){
+	/*
+		evalpol(a, xx) - Returns the 'ay' value corresponding to the evaluation of the 'a' polynomial at the 'xx' point.
+
+		Input:
+		a - vector of real values (length = p). The coefficients of the polynomial to evaluate.
+		xx - real value. Value where you want to evaluate the polynomial.
+
+		Output:
+		ay - real value. Evaluation of the polynomial at 'xx' points.
+	*/ 
+
+	int p=a.n-1; //degree of polynomial
+	real ay;
+
+	for (int j=0;j<p+1;j++){
+		ay+=a[j]*((xx)^j);
+	}	
+
+	return ay;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+func real maxajustepol(real[int] &a, real &t1, real &t2){
+	/*
+		Returns the 'tx' value where the polynomial with coefficients 'a' reaches the maximum value 
+		in the interval [t1 , t2].
+
+		Input:
+		a - vector of real values (length = p). Coefficients of the polynomial. 
+		t1 - real value. Initial value of the interval.
+		t2 - real value. End value of the interval.
+
+		Output:
+		tx - real value. Value where the polynomial the polynomial with coefficients 'a' reaches the maximum.
+	*/ 
+
+
+	real tx = (t1+t2)*0.5;  // Middle point of interval t1, t2
+	int p = a.n; 			// number of coefficients
+
+	real ay=1., ayoll=1.;
+
+	/* Locate the tx value where the derivative vanishes, to find it calculate the value of the derivative 
+	at the middle point and depending on its sign , select a new interval. 
+	(if it is >0 the interval is [tx;t2], if not the interval is [t1;tx]) */
+	while (abs(ay)>1e-8 && abs(ay)<abs(ayoll)){
+		ayoll=ay;
+		ay=0;
+		for (int j=1; j<p; j++){
+			ay += (j)*a[j]*((tx)^(j-1));		
+		}
+		// Select the interval depending on the sign of the derivative
+		if (ay>0){
+		t1=tx;
+		}else{
+			t2=tx;
+		}
+		tx=(t1+t2)*0.5; //recalculate the middle point
+		
+	}
+	
+	return tx;
+}
+
+////////////////////////////////////////////////////////////////
