@@ -1,4 +1,4 @@
-#PhaseVelocity Code
+# PhaseVelocity Code
 
 PhaseVelocity is a FreeFEM++ Code to compute the phase velocity of an ultrasonic pulse $g(t)$, while it travels along a transversally annular isotropic plate, see Figure1
 
@@ -13,7 +13,7 @@ The pulse (depending on the frequency $f_0$) is applied on the black boundary of
 **PhaseVelocity code** implements a combination of the velocity method (PVM) [^1] with the finite element method (FEM). The FEM-PVM [^2]  is based on the numerical solution of the wave propagation equations, which is computed using a second order difference scheme for the temporal variable and FEM triangular quadratic Lagrange discretization for spatial variables. The phase velocity for a given frequency is obtained from the computed displacements at few points on the top of the plate, in a similar way as the case of thin plane plates [^3]. 
 Running the code for several frequency values, an array of frequency vs phase velocity points is obtained. The phase velocity dispersion curve can be computed fitting these points.  
 
-##Requirements
+## Requirements
 **PhaseVelocity Code** has been tested with FreeFem++ 3.56 and above and should run on most personal laptops and desktop computers.
 
 ##Input
