@@ -16,18 +16,18 @@ Running the code for several frequency values, an array of frequency vs phase ve
 ## Requirements
 **PhaseVelocity Code** has been tested with FreeFem++ 3.56 and above and should run on most personal laptops and desktop computers.
 
-##Input
+## Input
 
 - $f_0$ in the interval $[1,15] \times 10^5Hz $ $(100kHz - 3MHz)$
 
 - &kappa; in the interval $[0,100]$  
 
-##Functionality
+## Functionality
 - Computation of the displacements of points of the plate.
 - Plot of the wave propagation.
 - Computation of the phase velocity.
 
-##Graphical Output
+## Graphical Output
 
 ![image info](./graficos_curva/curvas_policia.png "Figure3: Vertical displacements of 6 selected points on the top of the plate")
 
@@ -35,11 +35,11 @@ Running the code for several frequency values, an array of frequency vs phase ve
 after emitting a pulse. Colors correspond to the intensity of the norm
 of the displacement field.")
 
-##Note
+## Note
 To execute the code the funcions.edp file and PhaseVelocity.edp file must be in the same folder. Run the main file PhaseVelocity.edp
 
 
-##Bibligraphy
+## Bibligraphy
 [^1]: [E. Moreno, N. Galarza, B. Rubio and J. A. Otero, Phase velocity method for guided wave measurements in composite plates, in UIA Symposium 2014, Physics Procedia, Vol. 63,  54--60, 2015.]
 [^2]: M. Cruz, V. Hernández,  J. Estrada, E. Moreno, A. Mansur, Phase velocity method for computing dispersion curves in curved  plate waveguides, to appear in journal REVISTA INVESTIGACIÓN OPERACIONAL, 2023.
 [^3]: M. Cruz, A. Mansur, E. Moreno, V. Hernández and J. Estrada, Wave Propagation Code with FreeFEM, https://github.com/MathICIMAF/Wave-Propagation-Code-with-FreeFEM.]
