@@ -40,13 +40,9 @@ Running the code for several frequency values, an array of frequency vs phase ve
 **Figure 3:** Vertical displacements of 6 selected points on the top of the plate
 
 
-![image info](./graficos_curva/wave_propagation_cuve.png "Deformation of the curved steel plate for a fixed time
-after emitting a pulse. Colors correspond to the intensity of the norm
-of the displacement field.")
+![image info](./graficos_curva/wave_propagation_cuve.png "Deformation of the curved steel plate for a fixed time after emitting a pulse. Colors correspond to the intensity of the norm of the displacement field.")
 
-**Figure 4:** Deformation of the curved steel plate for a fixed time
-after emitting a pulse. Colors correspond to the intensity of the norm
-of the displacement field.
+**Figure 4:** Deformation of the curved steel plate for a fixed time after emitting a pulse. Colors correspond to the intensity of the norm of the displacement field.
 
 ## Note
 To execute the code the funcions.edp file and PhaseVelocity.edp file must be in the same folder. Run the main file PhaseVelocity.edp
