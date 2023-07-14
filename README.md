@@ -10,7 +10,7 @@ The pulse (depending on the frequency $f_0$) is applied on the black boundary of
 
 <!-- ![image info](./graficos_curva/equ1.png) -->
 
-$g(t)=\phi\ \sin \left( 2\ \pi\ {\it f_0}\ t \right) {{\rm e}^{-
+$g(t)=\phi\ \sin \left( 2\ \pi\ {\it f_0}\ t \right) {{e}^{-
 0.9134221857\ {{\it f_0}}^{2} \left( t-\ \frac{9}{4 {\it f_0}} \right) ^{2}}},\ \ for\ \ t\geq 0$
 
 ![image info](./graficos_curva/pulse_new.png "Pulse")
