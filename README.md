@@ -2,7 +2,7 @@
 
 PhaseVelocity is a FreeFEM++ Code to compute the phase velocity of an ultrasonic pulse $g(t)$, while it travels along a transversally annular isotropic plate, see [Figure 1](#Annular-isotropic-plate)
 
-![image info](./graficos_curva/sectorcircular.png "Figure 1: Annular isotropic plate")
+![image info](./graficos_curva/sectorcircular.png "Annular isotropic plate")
 
 **Figure 1:** Annular isotropic plate.
 
@@ -11,9 +11,9 @@ The pulse (depending on the frequency $f_0$) is applied on the black boundary of
 <!-- ![image info](./graficos_curva/equ1.png) -->
 
 $g(t)=\phi\ \sin \left( 2\ \pi\ {\it f_0}\ t \right) {{\rm e}^{-
-0.9134221857\ {{\it f_0}}^{2} \left( t-\ \frac{9}{4 {\it f_0}} \right) ^{2}}},\ \ for\ \ t\geq 0 $
+0.9134221857\ {{\it f_0}}^{2} \left( t-\ \frac{9}{4 {\it f_0}} \right) ^{2}}},\ \ for\ \ t\geq 0$
 
-![image info](./graficos_curva/pulse_new.png "Figure 2: Pulse")
+![image info](./graficos_curva/pulse_new.png "Pulse")
 
 **Figure 2:** Pulse $g(t)$ for $\it f_0 = 0.5\ MHz$ and $\phi = 1.0\times 10^{-3}m$.
 
@@ -36,12 +36,12 @@ Running the code for several frequency values, an array of frequency vs phase ve
 
 ## Graphical Output
 
-![image info](./graficos_curva/curvas_policia.png "Figure 3: Vertical displacements of 6 selected points on the top of the plate.")
+![image info](./graficos_curva/curvas_policia.png "Vertical displacements of 6 selected points on the top of the plate.")
 
 **Figure 3:** Vertical displacements of 6 selected points on the top of the plate
 
 
-![image info](./graficos_curva/wave_propagation_cuve.png "Figure 4: Deformation of the curved steel plate for a fixed time
+![image info](./graficos_curva/wave_propagation_cuve.png "Deformation of the curved steel plate for a fixed time
 after emitting a pulse. Colors correspond to the intensity of the norm
 of the displacement field.")
 
