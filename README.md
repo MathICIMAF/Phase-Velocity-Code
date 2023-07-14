@@ -1,12 +1,12 @@
 # PhaseVelocity Code
 
-PhaseVelocity is a FreeFEM++ Code to compute the phase velocity of an ultrasonic pulse $g(t)$, while it travels along a transversally annular isotropic plate, see [Figure 1](#/graficos_curva/sectorcircular.png)
+PhaseVelocity is a FreeFEM++ Code to compute the phase velocity of an ultrasonic pulse $g(t)$, while it travels along a transversally annular isotropic plate, see [Figure 1](//graficos_curva/sectorcircular.png)
 
 ![image info](./graficos_curva/sectorcircular.png "Annular isotropic plate")
 
 **Figure 1:** Annular isotropic plate.
 
-The pulse (depending on the frequency $f_0$) is applied on the black boundary of the plate and it is given by (see [Figure 2](#/graficos_curva/pulse_new.png)):
+The pulse (depending on the frequency $f_0$) is applied on the black boundary of the plate and it is given by (see [Figure 2](//graficos_curva/pulse_new.png)):
 
 <!-- ![image info](./graficos_curva/equ1.png) -->
 
