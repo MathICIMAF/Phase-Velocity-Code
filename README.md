@@ -26,7 +26,7 @@ Running the code for several frequency values, an array of frequency vs phase ve
 
 - $f_0$ in the interval $[1,15] \times 10^5 Hz\ (100kHz - 1.5MHz)$
 
-- &kappa; in the interval $[0.01,90]\ m^{-1} $  
+- Curvature &kappa; in the interval $[0.01,90]\ m^{-1} $  
 
 ## Functionality
 - Computation of the displacements of points of the plate.
